@@ -192,7 +192,7 @@ namespace RoavVideoViewer
             _map.InfoLayers.Add(_tripInfoLayer);
         }
 
-        public void AddPoint(double lat, double lon)
+        public void AddPoint(double lat, double lon, double speed)
         {
             if (_positionLayer != null)
             {
@@ -202,7 +202,14 @@ namespace RoavVideoViewer
                 MapControl.RefreshData();
 
                 if (_track)
-                    MoveToArea(lat, lon);
+                {
+                    double offset = 0.05;
+                    if (speed < 30)
+                        offset = 0.001;
+                    else if (speed < 60)
+                        offset = 0.005;
+                    MoveToArea(lat, lon, offset);
+                }
             }
         }
 
@@ -219,6 +226,12 @@ namespace RoavVideoViewer
         private void ButtonTrack_Click(object sender, RoutedEventArgs e)
         {
             Track = true;
+        }
+
+        private void ZoomToAll_Click(object sender, RoutedEventArgs e)
+        {
+            Track = false;
+            _map.NavigateTo(_map.Layers[1].Envelope);
         }
     }
 }

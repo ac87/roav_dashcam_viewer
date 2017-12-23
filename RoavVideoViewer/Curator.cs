@@ -142,7 +142,7 @@ namespace RoavVideoViewer
                     TrailItem trailItem = _currentVideo.TrailItems[seconds];
                     if (trailItem.Latitude != 0 && trailItem.Longitude != 0)
                     {
-                        MapView.AddPoint(trailItem.Latitude, trailItem.Longitude);
+                        MapView.AddPoint(trailItem.Latitude, trailItem.Longitude, trailItem.SpeedMph);
                         return trailItem;
                     }
                 }

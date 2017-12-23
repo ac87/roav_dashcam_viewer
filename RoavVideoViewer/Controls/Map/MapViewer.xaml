@@ -7,8 +7,26 @@
              xmlns:xaml="clr-namespace:Mapsui.UI.Wpf;assembly=Mapsui.UI.Wpf"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Icons.xaml" />
+                <ResourceDictionary Source="../Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid Background="{StaticResource MouseOverForegroundBrush}">
         <xaml:MapControl Name="MapControl" />
-        <Button x:Name="ButtonTrack" Margin="2" Padding="5" Content="Track" HorizontalAlignment="Left"  VerticalAlignment="Bottom" Click="ButtonTrack_Click" Visibility="Collapsed" />
+
+        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Bottom">
+            <Button Name="ButtonTrack" Style="{DynamicResource ModernButtonStyle}" Click="ButtonTrack_Click" Visibility="Collapsed">
+                <Path Stretch="Uniform" Data="{Binding Source={StaticResource TargetIcon}, Path=Data}" Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
+            </Button>
+
+            <Button Name="ZoomToAll" Style="{DynamicResource ModernButtonStyle}" Click="ZoomToAll_Click">
+                <Path Stretch="Uniform" Data="{Binding Source={StaticResource ToggleFullscreenIcon}, Path=Data}" Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
+            </Button>
+        </StackPanel>
+
     </Grid>
 </UserControl>
