@@ -1,0 +1,53 @@
+﻿<UserControl x:Class="RoavVideoViewer.Controls.Explorer.TripExplorerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:RoavVideoViewer.Controls.Explorer"
+             xmlns:root="clr-namespace:RoavVideoViewer"
+             xmlns:helpers="clr-namespace:RoavVideoViewer.Helpers"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <helpers:ImageConverter x:Key="ImageConverter" />
+        <Style x:Key="VideoListItemStyle" TargetType="{x:Type ListViewItem}">
+            <EventSetter Event="PreviewMouseDoubleClick" Handler="HandleVideoDoubleClick" />
+            <EventSetter Event="MouseRightButtonUp" Handler="HandleVideoRightClick" />
+        </Style>
+    </UserControl.Resources>
+    <Grid HorizontalAlignment="Stretch" Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="250*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Image Source="{Binding ThumbnailPath, Converter={StaticResource ImageConverter}}" Width="180" HorizontalAlignment="Left" />
+
+        <Expander Grid.Row="1" IsExpanded="False" Margin="0" HorizontalAlignment="Stretch" Padding="0">
+            <Expander.Header>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Stretch">
+                    <TextBlock Foreground="{StaticResource ForegroundBrush}" Text="{Binding Path=StartTime}" VerticalAlignment="Center" />
+                    <TextBlock Foreground="{StaticResource ForegroundBrush}" Text="-" VerticalAlignment="Center" Margin="5,0" />
+                    <TextBlock Foreground="{StaticResource ForegroundBrush}" Text="{Binding Path=EndTime}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Expander.Header>
+            <ListView Margin="0" Name="ListViewVideos" ItemContainerStyle="{StaticResource VideoListItemStyle}" ItemsSource="{Binding Videos}"  HorizontalAlignment="Stretch">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Border BorderBrush="{StaticResource ButtonBorder}" BorderThickness="1">
+                                <Image Width="140">
+                                    <Image.Source>
+                                        <BitmapImage UriSource="{Binding ThumbnailPath}" DecodePixelWidth="140" />
+                                    </Image.Source>
+                                </Image>
+                            </Border>
+                            <Label Content="{Binding StartTime}" HorizontalAlignment="Center" HorizontalContentAlignment="Center" VerticalAlignment="Center"  />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Expander>
+
+    </Grid>
+</UserControl>
