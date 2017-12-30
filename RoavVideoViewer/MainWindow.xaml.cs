@@ -7,7 +7,8 @@ namespace RoavVideoViewer
     /// </summary>
     public partial class MainWindow : Window
     {       
-        public const string Folder = @"C:\Users\Tony\Desktop\MOVIE\";
+        public const string MovieFolder = @"C:\Users\Tony\Desktop\MOVIE\";
+        public const string SnapshotsFolder = @"C:\Users\Tony\Desktop\MOVIE Snapshots\";
 
         public MainWindow()
         {
@@ -16,7 +17,7 @@ namespace RoavVideoViewer
             Curator curator = Curator.Instance;
             curator.MapView = MapView;
             curator.VideoView = VideoView;
-            curator.LoadFolder(Folder);
+            curator.LoadFolder(MovieFolder);
 
             ExplorerView.Trips = curator.TripCollection;        
 

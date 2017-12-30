@@ -47,6 +47,8 @@ namespace RoavVideoViewer
             InitializeComponent();
             _map = MapControl.Map;
 
+            //MapControl.RenderMode = Mapsui.UI.Wpf.RenderMode.Wpf;
+
             System.Windows.Media.Color color = (System.Windows.Media.Color) FindResource("WindowBackgroundColor");
             _map.BackColor = Color.FromArgb(255, color.R, color.G, color.B);
 
@@ -68,7 +70,8 @@ namespace RoavVideoViewer
             if (infoEventArgs.Feature != null && infoEventArgs.Feature["Video"] != null)
             {
                 Video video = (Video) infoEventArgs.Feature["Video"];
-                Curator.Instance.PlayNext(video);
+                int secs = (int)infoEventArgs.Feature["Seconds"];
+                Curator.Instance.PlayNext(video, false, secs);
             }
         }
 
@@ -118,26 +121,35 @@ namespace RoavVideoViewer
             Point lastPoint = null;
             List<Point> points = new List<Point>();
 
+            double? firstLat = null;
+            double? firstLon = null;
+
             foreach (Video video in trip.Videos)
             {
-                bool first = true;
-
-                foreach (TrailItem item in video.TrailItems.Values.ToList())
+                foreach (KeyValuePair<int, TrailItem> kvp in video.TrailItems.ToList())
                 {
-                    var location = SphericalMercator.FromLonLat(item.Longitude, item.Latitude);
+                    var item = kvp.Value;
 
-                    if (first)
+                    if (item.Longitude == 0 && item.Latitude == 0)
+                        continue;
+
+                    if (firstLat == null)
                     {
-                        infoFeatures.Add(new Feature()
-                        {
-                            Geometry = location,
-                            ["Video"] = video
-                        });
-                        first = false;
+                        firstLat = item.Latitude;
+                        firstLon = item.Longitude;
                     }
+
+                    var location = SphericalMercator.FromLonLat(item.Longitude, item.Latitude);
 
                     if (lastPoint != null && location.Distance(lastPoint) < 35)
                         continue;
+
+                    infoFeatures.Add(new Feature()
+                    {
+                        Geometry = location,
+                        ["Video"] = video,
+                        ["Seconds"] = kvp.Key
+                    });
 
                     lastPoint = location;
                     int index = MapColors.GetStyleIndexFromSpeed(item.SpeedMph);
@@ -177,19 +189,33 @@ namespace RoavVideoViewer
                 Name = "MoviesLayer",
                 Style = new SymbolStyle
                 {
-                    SymbolScale = 0.6,
+                    SymbolScale = 0.5,
                     SymbolOffset = new Offset(0, 0),
-                    SymbolType = SymbolType.Rectangle,
-                    Line = new Pen(Color.Black, 2),
-                    Fill = new Brush(Color.White),
-                    Opacity = 0.75
+                    SymbolType = SymbolType.Ellipse,
+                    //Line = new Pen(Color.Black, 2),
+                    //Fill = new Brush(Color.White),
+                    //Opacity = 0.1
+                    Line = new Pen(Color.White, 0),
+                    Fill = new Brush(Color.Transparent),
+                    Opacity = 0.0
                 }
             };
 
             _map.Layers.Insert(1, _tripTrailLayer);
 
-            _map.Layers.Insert(1, _tripInfoLayer);
+            //_map.Layers.Insert(1, _tripInfoLayer);
             _map.InfoLayers.Add(_tripInfoLayer);
+
+            if (_positionLayer != null)
+            {
+                MemoryProvider dataSource = ((MemoryProvider)((MemoryLayer)_positionLayer).DataSource);
+                dataSource.Features.Clear();
+            }
+
+            if (firstLat != null && firstLon != null)
+                MoveToArea((double)firstLat, (double)firstLon, 0.001);
+
+            MapControl.RefreshData();
         }
 
         public void AddPoint(double lat, double lon, double speed)
@@ -219,7 +245,7 @@ namespace RoavVideoViewer
             {
                 DataSource = new MemoryProvider(),
                 Name = "PositionLayer",
-                Style = new SymbolStyle { SymbolScale = 0.4, SymbolOffset = new Offset(0, 0), SymbolType = SymbolType.Ellipse, Fill = new Mapsui.Styles.Brush(Mapsui.Styles.Color.Blue) },
+                Style = new SymbolStyle { SymbolScale = 0.4, SymbolOffset = new Offset(0, 0), SymbolType = SymbolType.Ellipse, Outline = new Pen(Color.White), Fill = new Brush(Color.Blue) },
             };
         }
 

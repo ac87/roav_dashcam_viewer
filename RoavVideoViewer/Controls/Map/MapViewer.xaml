@@ -24,7 +24,7 @@
             </Button>
 
             <Button Name="ZoomToAll" Style="{DynamicResource ModernButtonStyle}" Click="ZoomToAll_Click">
-                <Path Stretch="Uniform" Data="{Binding Source={StaticResource ToggleFullscreenIcon}, Path=Data}" Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
+                <Path Stretch="Uniform" Data="{Binding Source={StaticResource MagnifyGlassIcon}, Path=Data}" Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
             </Button>
         </StackPanel>
 

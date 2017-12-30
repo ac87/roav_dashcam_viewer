@@ -22,7 +22,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid Name="Player">
+    <Grid Name="Player" Background="{StaticResource WindowBackgroundBrush}">
         <Grid.Resources>
             <Storyboard x:Key="ShowControlOpacity" Storyboard.TargetProperty="(Grid.Opacity)">
                 <DoubleAnimation To="1" Duration="0:0:0.100" FillBehavior="HoldEnd" />
@@ -78,6 +78,10 @@
                 </Grid.ColumnDefinitions>
                 <DockPanel Name="LeftControls" HorizontalAlignment="Left" Grid.Column="0">
 
+                    <Button Name="ToggleFullscreenButton" Style="{DynamicResource ModernButtonStyle}" Command="{Binding ElementName=control, Path=ToggleFullscreenCommand}">
+                        <Path Stretch="Uniform" Data="{Binding Source={StaticResource ToggleFullscreenIcon}, Path=Data}" Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
+                    </Button>
+                    
                     <ToggleButton Name="MapToggleButton" Style="{DynamicResource ModernToggleButtonStyle}" IsChecked="{Binding ElementName=control, Path=IsMapVisible, Mode=TwoWay}">
                         <Path Stretch="Uniform" Data="{Binding Source={StaticResource MapIcon}, Path=Data}" Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}}}" />
                     </ToggleButton>
@@ -121,7 +125,7 @@
 
                                 <!-- Speed Ration Slider -->
                                 <TextBlock Grid.Row="2" Grid.Column="0">Speed</TextBlock>
-                                <Slider IsEnabled="{Binding ElementName=control, Path=IsSpeedRatioEnabled}" Grid.Row="2" Grid.Column="1" Style="{DynamicResource CustomSliderStyle}" Minimum="0.0" Maximum="3.0" Value="{Binding ElementName=Media, Path=SpeedRatio}" />
+                                <Slider IsEnabled="{Binding ElementName=control, Path=IsSpeedRatioEnabled}" Grid.Row="2" Grid.Column="1" Style="{DynamicResource CustomSliderStyle}" Minimum="0.0" Maximum="5.0" Value="{Binding ElementName=Media, Path=SpeedRatio}" />
                                 <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding ElementName=Media, Path=SpeedRatio, Mode=OneWay, Converter={StaticResource PercentageFormatter}}" />
 
                             </Grid>
@@ -130,18 +134,15 @@
                     <ToggleButton Visibility="{Binding ElementName=control, Path=AudioControlVisibility}" Name="MuteUnmuteButton" Style="{DynamicResource ModernToggleButtonStyle}" IsChecked="{Binding ElementName=Media, Path=IsMuted, Mode=TwoWay}">
                         <Path Stretch="Uniform" Data="{Binding Source={StaticResource UnmuteIcon}, Path=Data}" Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}}}" />
                     </ToggleButton>
-
-                    <Button Name="ScreenshotButton" Style="{DynamicResource ModernButtonStyle}" Command="{Binding ElementName=control, Path=ScreenshotCommand}">
-                        <Path Stretch="Uniform" Data="{Binding Source={StaticResource CameraIcon}, Path=Data}" Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
-                    </Button>
+                    
                 </DockPanel>
 
                 <DockPanel Name="RightControls" HorizontalAlignment="Right" Grid.Column="2">
 
-                    <Button Name="ToggleFullscreenButton" Style="{DynamicResource ModernButtonStyle}" Command="{Binding ElementName=control, Path=ToggleFullscreenCommand}">
-                        <Path Stretch="Uniform" Data="{Binding Source={StaticResource ToggleFullscreenIcon}, Path=Data}" Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
+                    <Button Name="ScreenshotButton" Style="{DynamicResource ModernButtonStyle}" Command="{Binding ElementName=control, Path=ScreenshotCommand}">
+                        <Path Stretch="Uniform" Data="{Binding Source={StaticResource CameraIcon}, Path=Data}" Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
                     </Button>
-
+                    
                     <ToggleButton Name="OpenDebugButton" Style="{DynamicResource ModernToggleButtonStyle}">
                         <Path Stretch="Uniform" Data="{Binding Source={StaticResource OpenDebugIcon}, Path=Data}" Fill="{Binding Path=Foreground, RelativeSource={RelativeSource AncestorType={x:Type ToggleButton}}}" />
                     </ToggleButton>

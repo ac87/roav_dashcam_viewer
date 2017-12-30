@@ -16,6 +16,8 @@ using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using RoavVideoViewer.Helpers;
 using Unosquare.FFME;
+using Accord.Video.FFMPEG;
+using System.Drawing.Imaging;
 
 namespace RoavVideoViewer
 {
@@ -28,10 +30,16 @@ namespace RoavVideoViewer
 
         public ObservableCollection<Video> Items { get; set; }
 
+        private int _startOffset = 0;
+
         public void Play(Video video, int seconds = 0)
         {
             if (Media.IsOpening)
                 return;
+
+            _isMuted = Media.IsMuted;
+            _volume = Media.Volume;
+            _speedRatio = Media.SpeedRatio;
 
             if (Media.IsPlaying)
             {
@@ -39,11 +47,9 @@ namespace RoavVideoViewer
                 Media.Source = null;
             }
 
-            Media.Source = new Uri(video.FilePath);
-            Media.Play();
+            _startOffset = seconds;
 
-            if (seconds > 0)
-                Media.Position = TimeSpan.FromSeconds(seconds);
+            Media.Source = new Uri(video.FilePath);                                   
         }
 
         private void MediaPlayer_MediaEnded(object sender, RoutedEventArgs e)
@@ -150,12 +156,14 @@ namespace RoavVideoViewer
 
             UpdateWindowTitle();
 
+            Media.Background = (Brush) FindResource("WindowBackgroundBrush");
+
             //IsMapVisible = true;
 
             DispatcherTimer timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(0.25);
             timer.Tick += timer_Tick;
-            timer.Start();
+            timer.Start();            
         }
 
         #endregion
@@ -287,7 +295,34 @@ namespace RoavVideoViewer
             get
             {
                 if (m_ScreenshotCommand == null)
-                    m_ScreenshotCommand = new DelegateCommand(o => { });
+                    m_ScreenshotCommand = new DelegateCommand(o => {
+
+                        if (Media.Source != null)
+                        {
+                            bool play = false;
+                            if (Media.IsPlaying)
+                            {
+                                Media.Pause();
+                                play = true;
+                            }
+
+                            double frameLength = Media.VideoFrameLength;
+
+                            var position = Media.Position;
+                            
+                            string file = Media.Source?.ToString();
+
+                            VideoFileReader reader = new VideoFileReader();
+                            reader.Open(file);
+                            System.Drawing.Bitmap frame = reader.ReadVideoFrame();
+                            reader.Close();
+
+                            frame.Save(MainWindow.SnapshotsFolder + file + "_" + position.TotalSeconds + ".jpg", ImageFormat.Jpeg);
+
+                            if (play)
+                                Media.Play();
+                        }
+                    });
 
                 return m_ScreenshotCommand;
             }
@@ -453,7 +488,7 @@ namespace RoavVideoViewer
             Media.MediaOpening += Media_MediaOpening;
             Media.MediaFailed += Media_MediaFailed;
             Media.MessageLogged += Media_MessageLogged;
-            Media.PropertyChanged += Media_PropertyChanged;
+            Media.PropertyChanged += Media_PropertyChanged;            
             Unosquare.FFME.MediaElement.FFmpegMessageLogged += MediaElement_FFmpegMessageLogged;
 
 #if HANDLE_RENDERING_EVENTS
@@ -813,7 +848,10 @@ namespace RoavVideoViewer
         private void UpdateWindowTitle()
         {
             var v = typeof(MainWindow).Assembly.GetName().Version;
-            var title = Media.Source?.ToString() ?? "(No media loaded)";
+            var title = "(No media loaded)";
+            if (Media?.Source != null)            
+                title = Path.GetFileName(Media.Source.ToString());
+                      
             var state = Media?.MediaState.ToString();
 
             if (Media.IsOpen)
@@ -876,7 +914,7 @@ namespace RoavVideoViewer
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="PropertyChangedEventArgs"/> instance containing the event data.</param>
         private void Media_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
+        {            
             if (PropertyTriggers.ContainsKey(e.PropertyName) == false) return;
             foreach (var propertyName in PropertyTriggers[e.PropertyName])
             {
@@ -935,25 +973,22 @@ namespace RoavVideoViewer
         /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
         private void Media_MediaOpened(object sender, RoutedEventArgs e)
         {
-            // Set a start position (see issue #66)
-            /*
-            Media.Position = TimeSpan.FromSeconds(5);
-            Media.Play();
-            */
-
             MediaZoom = 1d;
             var source = Media.Source.ToString();
 
-            //if (Config.HistoryEntries.Contains(source))
-            //{
-            //    var oldIndex = Config.HistoryEntries.IndexOf(source);
-            //    Config.HistoryEntries.RemoveAt(oldIndex);
-            //}
+            Media.IsMuted = _isMuted;
+            Media.SpeedRatio = _speedRatio;
+            Media.Volume = _volume;
 
-            //Config.HistoryEntries.Add(Media.Source.ToString());
-            //Config.Save();
-            //RefreshHistoryItems();
+            if (_startOffset != 0)
+                Media.Position = TimeSpan.FromSeconds(_startOffset);
+
+            Media.Play();
         }
+
+        private bool _isMuted = false;
+        private double _speedRatio = 1.0;
+        private double _volume = 1.0;
 
         /// <summary>
         /// Handles the MediaOpening event of the Media control.
@@ -962,21 +997,6 @@ namespace RoavVideoViewer
         /// <param name="e">The <see cref="MediaOpeningRoutedEventArgs"/> instance containing the event data.</param>
         private void Media_MediaOpening(object sender, MediaOpeningRoutedEventArgs e)
         {
-            // An example of switching to a different stream
-            if (e.Info.InputUrl.EndsWith("matroska.mkv"))
-            {
-                var subtitleStreams = e.Info.Streams.Where(kvp => kvp.Value.CodecType == AVMediaType.AVMEDIA_TYPE_SUBTITLE).Select(kvp => kvp.Value);
-                var englishSubtitleStream = subtitleStreams.FirstOrDefault(s => s.Language.StartsWith("en"));
-                if (englishSubtitleStream != null)
-                    e.Options.SubtitleStream = englishSubtitleStream;
-
-                var audioStreams = e.Info.Streams.Where(kvp => kvp.Value.CodecType == AVMediaType.AVMEDIA_TYPE_AUDIO)
-                    .Select(kvp => kvp.Value).ToArray();
-
-                // var commentaryStream = audioStreams.FirstOrDefault(s => s.StreamIndex != e.Options.AudioStream.StreamIndex);
-                // e.Options.AudioStream = commentaryStream;
-            }
-
             // In realtime streams probesize can be reduced to reduce latency
             // e.Options.ProbeSize = 32; // 32 is the minimum
 
@@ -996,7 +1016,7 @@ namespace RoavVideoViewer
             }
 
             // Experimetal HW acceleration support. Remove if not needed.
-            /* e.Options.EnableHardwareAcceleration = Debugger.IsAttached; */
+            //e.Options.EnableHardwareAcceleration = Debugger.IsAttached;
 
 #if APPLY_AUDIO_FILTER
             // e.Options.AudioFilter = "aecho=0.8:0.9:1000:0.3";

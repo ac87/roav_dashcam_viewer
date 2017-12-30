@@ -69,21 +69,15 @@ namespace RoavVideoViewer
 
                 string jpg = Utils.GetFileNameWithoutExt(file.FullName) + ".jpg";
 
-                Bitmap frame;
-
                 if (!File.Exists(jpg)) {
 
                     VideoFileReader reader = new VideoFileReader();
                     reader.Open(file.FullName);
-                    frame = reader.ReadVideoFrame();
+                    Bitmap frame = reader.ReadVideoFrame();
                     reader.Close();
 
                     frame.Save(jpg, ImageFormat.Jpeg);
-                }
-                else
-                {
-                    frame = (Bitmap) Image.FromFile(jpg);
-                }
+                }                
 
                 if (trip.StartDateTime > currentDate)
                     trip.StartDateTime = currentDate;
