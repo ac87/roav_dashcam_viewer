@@ -297,7 +297,7 @@ namespace RoavVideoViewer
                 if (m_ScreenshotCommand == null)
                     m_ScreenshotCommand = new DelegateCommand(o => {
 
-                        if (Media.Source != null)
+                        /*if (Media.Source != null)
                         {
                             bool play = false;
                             if (Media.IsPlaying)
@@ -321,7 +321,7 @@ namespace RoavVideoViewer
 
                             if (play)
                                 Media.Play();
-                        }
+                        }*/
                     });
 
                 return m_ScreenshotCommand;

@@ -42,12 +42,17 @@ namespace RoavVideoViewer
 
         public void LoadFolder(string folder)
         {
+            TripCollection.Clear();
+
             _folder = folder;
             DirectoryInfo dir = new DirectoryInfo(folder);
 
             DateTime currentDate = DateTime.MinValue;
 
             Trip trip = null;
+
+            if (!Directory.Exists(folder))            
+                return;
 
             foreach (var file in dir.GetFiles("*.mp4"))
             {
@@ -71,12 +76,19 @@ namespace RoavVideoViewer
 
                 if (!File.Exists(jpg)) {
 
-                    VideoFileReader reader = new VideoFileReader();
-                    reader.Open(file.FullName);
-                    Bitmap frame = reader.ReadVideoFrame();
-                    reader.Close();
+                    try
+                    {
+                        VideoFileReader reader = new VideoFileReader();
+                        reader.Open(file.FullName);
+                        Bitmap frame = reader.ReadVideoFrame();
+                        reader.Close();
 
-                    frame.Save(jpg, ImageFormat.Jpeg);
+                        frame.Save(jpg, ImageFormat.Jpeg);
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
                 }                
 
                 if (trip.StartDateTime > currentDate)

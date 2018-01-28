@@ -3,6 +3,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using RoavVideoViewer.Model;
+using System;
+using System.Globalization;
 
 namespace RoavVideoViewer.Controls.Explorer
 {
@@ -15,7 +17,13 @@ namespace RoavVideoViewer.Controls.Explorer
 
         public MonthExplorerView()
         {
-            InitializeComponent();
+            InitializeComponent();            
+
+            var date = DateTime.Now;
+            ComboBoxYear.SelectedItem = date.Year.ToString();
+
+            var month = date.ToString("MMM", CultureInfo.InvariantCulture);
+            ComboBoxMonth.SelectedItem = month;            
         }
 
         public ObservableCollection<Trip> Trips
@@ -36,6 +44,12 @@ namespace RoavVideoViewer.Controls.Explorer
         {
             var trip = ((ListViewItem)sender).Content as Trip;
             Curator.Instance.PlayNew((Trip)trip);
+        }
+
+        private void ComboBoxMonth_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ComboBoxYear.SelectedItem != null && ComboBoxMonth.SelectedItem != null)
+                Curator.Instance.LoadFolder(MainWindow.HardDriveRoot + ComboBoxYear.SelectedItem.ToString() + "\\" + ComboBoxMonth.SelectedItem.ToString() + "\\");
         }
     }
 }

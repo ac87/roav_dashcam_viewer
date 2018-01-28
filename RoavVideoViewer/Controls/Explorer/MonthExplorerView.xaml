@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RoavVideoViewer"
              xmlns:explorer="clr-namespace:RoavVideoViewer.Controls.Explorer"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="200">
     <UserControl.Resources>
@@ -21,8 +22,29 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBlock Foreground="{StaticResource ForegroundBrush}" HorizontalAlignment="Left" Margin="10,5" TextWrapping="Wrap" Text="Month" VerticalAlignment="Top"/>
-        <ComboBox HorizontalAlignment="Stretch" Margin="10,2,2,2" VerticalAlignment="Top" Grid.Column="1"/>
+        <ComboBox x:Name="ComboBoxYear" HorizontalAlignment="Stretch" Margin="10,2,2,2" VerticalAlignment="Top" Width="75" SelectionChanged="ComboBoxMonth_SelectionChanged">
+            <ComboBox.Items>
+                <sys:String>2017</sys:String>
+                <sys:String>2018</sys:String>
+                <sys:String>2019</sys:String>
+            </ComboBox.Items>
+        </ComboBox>
+        <ComboBox x:Name="ComboBoxMonth" HorizontalAlignment="Stretch" Margin="10,2,2,2" VerticalAlignment="Top" Grid.Column="1" SelectionChanged="ComboBoxMonth_SelectionChanged">
+            <ComboBox.Items>
+                <sys:String>Jan</sys:String>
+                <sys:String>Feb</sys:String>
+                <sys:String>Mar</sys:String>
+                <sys:String>Apr</sys:String>
+                <sys:String>May</sys:String>
+                <sys:String>Jun</sys:String>
+                <sys:String>Jul</sys:String>
+                <sys:String>Aug</sys:String>
+                <sys:String>Sept</sys:String>
+                <sys:String>Oct</sys:String>
+                <sys:String>Nov</sys:String>
+                <sys:String>Dec</sys:String>
+            </ComboBox.Items>
+        </ComboBox>
 
         <ListView Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" x:Name="ListViewTrips" ItemContainerStyle="{StaticResource TripListItemStyle}">
             <ListView.ItemTemplate>

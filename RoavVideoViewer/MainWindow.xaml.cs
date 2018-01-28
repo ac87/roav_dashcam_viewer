@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System;
+using System.Globalization;
+using System.IO;
+using System.Windows;
 
 namespace RoavVideoViewer
 {
@@ -7,17 +10,30 @@ namespace RoavVideoViewer
     /// </summary>
     public partial class MainWindow : Window
     {       
-        public const string MovieFolder = @"C:\Users\Tony\Desktop\MOVIE\";
-        public const string SnapshotsFolder = @"C:\Users\Tony\Desktop\MOVIE Snapshots\";
+        public static string HardDriveRoot = null;        
 
         public MainWindow()
         {
-            InitializeComponent();
+            DriveInfo[] drives = DriveInfo.GetDrives();
+            foreach (var drive in drives)
+            {
+                if (drive.IsReady && drive.VolumeLabel == "DASHCAM")
+                {
+                    HardDriveRoot = drive.RootDirectory.ToString();
+                    break;
+                }
+            }
 
+            if (HardDriveRoot == null)
+            {
+                throw new Exception("Hard disk not found");
+            }
+
+            InitializeComponent();                                  
+          
             Curator curator = Curator.Instance;
             curator.MapView = MapView;
-            curator.VideoView = VideoView;
-            curator.LoadFolder(MovieFolder);
+            curator.VideoView = VideoView;            
 
             ExplorerView.Trips = curator.TripCollection;        
 
